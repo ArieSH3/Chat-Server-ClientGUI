@@ -13,7 +13,6 @@ class Client_Start:
 		# Adding socket(IPv4, TCP) to client_socket var
 		self.client_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 
-		self.separator = '<SEP>'
 		self.username = None
 
 		try:
@@ -35,9 +34,13 @@ class Client_App(Client_Start):
 
 		# ================= RESOURCES ==============================================================
 		
-		self.background = '#333333'
+		self.app_title = r'\\CHATTER//'
+		self.background = '#3f443c'
 		self.font = 'Helvetica 10 bold'
-		self.font_colour = '#FFFFFF'
+		self.title_font = 'Helvetica 24 bold'
+		self.font_colour = '#262924'
+		self.button_colour = '#F7E9CC'
+		self.label_colour = '#fcf5e9'
 
 		#self.username = None
 		self.input_text = None
@@ -60,17 +63,22 @@ class Client_App(Client_Start):
 		self.frame_main = tk.Frame(self.root)
 		self.frame_main.config(bg=self.background)
 		#frame_main.place(relx=0.5, rely=0.66, anchor='center')
-		self.frame_main.pack(pady=20)
+		self.frame_main.pack(pady=5)
+
+		# ==== LABEL TITLE ====
+		self.label_title = tk.Label(self.frame_main)
+		self.label_title.config(text=self.app_title, font=self.title_font, fg=self.label_colour, bg=self.background)
+		self.label_title.pack()
 
 		# ==== TEXT ====
 		#	Display field
 		self.display_field = tk.Text(self.frame_main)
-		self.display_field.config(height=23, borderwidth=0, font=self.font)
+		self.display_field.config(height=23, borderwidth=0, font=self.font, fg=self.font_colour, bg=self.label_colour)
 		self.display_field.pack()
 
 		#	Input field
 		self.chat_input_field = tk.Text(self.frame_main)
-		self.chat_input_field.config(height=5, borderwidth=0, width=71, font=self.font)
+		self.chat_input_field.config(height=5, borderwidth=0, width=71, font=self.font, fg=self.font_colour, bg=self.label_colour)
 		# Sets focus on widget so we dont have to click on it when starting a program
 		#	yet the cursor will already be blinking on it and we can start typing
 		self.chat_input_field.focus_set()
@@ -79,7 +87,7 @@ class Client_App(Client_Start):
 		# ==== BUTTON ====
 		#	Send button
 		self.button_send_message = tk.Button(self.frame_main, command=self.add_text)
-		self.button_send_message.config(text='Send', width=10, justify='center', borderwidth=1, font=self.font)
+		self.button_send_message.config(text='Send', width=10, justify='center', borderwidth=1, font=self.font, bg=self.button_colour, fg=self.font_colour)
 		self.button_send_message.pack(pady=(20,0), side='left', fill='both', expand=True)
 
 		# ==== BIND KEY ====
@@ -107,17 +115,17 @@ class Client_App(Client_Start):
 
 		# ==== LABEL ====
 		self.username_label = tk.Label(self.frame_username, text='Username:')
-		self.username_label.config(font=self.font, bg=self.background, fg=self.font_colour)
+		self.username_label.config(font=self.font, bg=self.background, fg=self.label_colour)
 		self.username_label.pack(side='left')
 
 		# ==== TEXT ====
 		self.username_input_field = tk.Text(self.frame_username)
-		self.username_input_field.config(height=1, borderwidth=4, width=20, font=self.font, wrap='none')
+		self.username_input_field.config(height=1, borderwidth=4, width=20, font=self.font, wrap='none', fg=self.font_colour, bg=self.label_colour)
 		self.username_input_field.pack(side='left')
 
 		# ==== BUTTON ====
 		self.username_button = tk.Button(self.frame_username, command=self.add_username)
-		self.username_button.config(borderwidth=1, font=self.font, text='Confirm')
+		self.username_button.config(borderwidth=1, font=self.font, text='Confirm', bg=self.button_colour, fg=self.font_colour)
 		self.username_button.pack(fill='both', expand=True)
 
 		# Have to find a way to bind while toplevel open, otherwise
@@ -149,11 +157,16 @@ class Client_App(Client_Start):
 					self.input_text = '{}: {}'.format(self.CS.username, self.input_text)
 			# If no username is entered it reminds the user and allows no further access
 			#	to chat functions
-			except NameError:
+			except (NameError, TypeError):
 				# Switched 'end' with tk.INSERT and it seems to do the same thing
 				self.display_field.insert(tk.INSERT, 'Error: no username detected!' + '\n')
-				self.chat_input_field.detelete('1.0','end')
+				self.chat_input_field.delete('1.0','end')
 				return
+
+			# except TypeError:
+			# 	self.display_field.insert(tk.INSERT, 'Error: no username detected!' + '\n')
+			# 	self.chat_input_field.detelete('1.0','end')
+			# 	return
 
 			# Enables edit of display field
 			self.display_field['state'] = 'normal'
@@ -189,8 +202,7 @@ class Client_App(Client_Start):
 				server_message = server_message.decode('utf-8')
 				# Add message to the text display field
 				print(server_message)
-				# PROGRAM REFUSES TO INSERT TEXT WHEN TWO USERS TALKING EVEN
-				# 	THOUGH IT RECEIVES MESSAGE AND PRINTS IT OUT JUST BEFORE THIS LINE OF CODE
+				# Insert message from server/client to the display field
 				self.display_field['state'] ='normal'
 				self.display_field.insert(tk.INSERT, server_message+'\n')
 				self.display_field['state'] = 'disabled'
